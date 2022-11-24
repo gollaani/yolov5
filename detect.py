@@ -88,7 +88,7 @@ def run(
 
     # Directories
     save_dir = increment_path(Path(project) / name, exist_ok=exist_ok)  # increment run
-    (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
+    (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir 
 
     # Load model
     device = select_device(device)
@@ -107,6 +107,12 @@ def run(
     else:
         dataset = LoadImages(source, img_size=imgsz, stride=stride, auto=pt, vid_stride=vid_stride)
     vid_path, vid_writer = [None] * bs, [None] * bs
+
+    #  ANISHA's changes
+    file_name = Path(source).stem
+    log_path = '/tmp/output/' + file_name
+    alphabet, last_alphabet = '', ''
+    #  End ANISHA's changes
 
     # Run inference
     model.warmup(imgsz=(1 if pt or model.triton else bs, 3, *imgsz))  # warmup
@@ -155,6 +161,17 @@ def run(
                 for c in det[:, 5].unique():
                     n = (det[:, 5] == c).sum()  # detections per class
                     s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
+
+                    #  ANISHA's changes
+                    alphabet = f"{names[int(c)]}"
+                    #if seen % 100 == 0 :
+                    #    with open(log_path + '.txt', 'a') as ff:
+                    #        ff.write(f'{s}Done. ({t3 - t2:.3f}s)' + '\n')
+                    if alphabet != last_alphabet :
+                        with open(log_path + '.txt', 'a') as ff:
+                            ff.write(f"{alphabet}")
+                        last_alphabet = alphabet
+                    #  End ANISHA's changes
 
                 # Write results
                 for *xyxy, conf, cls in reversed(det):
