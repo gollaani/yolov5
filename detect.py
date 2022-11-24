@@ -6,7 +6,6 @@ Usage - sources:
     $ python detect.py --weights yolov5s.pt --source 0                               # webcam
                                                      img.jpg                         # image
                                                      vid.mp4                         # video
-                                                     screen                          # screenshot
                                                      path/                           # directory
                                                      'path/*.jpg'                    # glob
                                                      'https://youtu.be/Zgi9g1ksQHc'  # YouTube
@@ -112,7 +111,9 @@ def run(
     #  ANISHA's changes
     file_name = Path(source).stem
     log_path = '/tmp/output/' + file_name
-    alphabet, last_alphabet = '', ''
+    Path(log_path + '.txt').touch()
+    alphabet, last_alphabet, new_alphabet = '', '', ''
+    hit_count = 0
     #  End ANISHA's changes
 
     # Run inference
@@ -165,13 +166,21 @@ def run(
 
                     #  ANISHA's changes
                     alphabet = f"{names[int(c)]}"
+
                     #if seen % 100 == 0 :
                     #    with open(log_path + '.txt', 'a') as ff:
                     #        ff.write(f'{s}Done. ({t3 - t2:.3f}s)' + '\n')
                     if alphabet != last_alphabet :
-                        with open(log_path + '.txt', 'a') as ff:
-                            ff.write(f"{alphabet}")
-                        last_alphabet = alphabet
+                        if new_alphabet == alphabet: 
+                            if hit_count > 5:
+                                with open(log_path + '.txt', 'a') as ff:
+                                    ff.write(f"{alphabet}")
+                                    last_alphabet = alphabet
+                            else: 
+                                hit_count += 1
+                        else: 
+                            new_alphabet = alphabet
+                            hit_count = 1
                     #  End ANISHA's changes
 
                 # Write results
